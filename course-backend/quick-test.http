@@ -1,0 +1,46 @@
+### 快速测试流程
+### 1. 健康检查
+GET http://localhost:8080/api/test/health
+Accept: application/json
+
+### 2. 用户注册
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "test123",
+  "name": "测试用户",
+  "email": "test@test.com",
+  "role": "STUDENT"
+}
+
+### 3. 用户登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "test123"
+}
+
+> {%
+    client.global.set("auth_token", response.body.data.token);
+%}
+
+### 4. 获取课程列表
+GET http://localhost:8080/api/courses
+Accept: application/json
+
+### 5. 搜索课程
+GET http://localhost:8080/api/courses/search?keyword=基础
+Accept: application/json
+
+### 6. 获取用户信息
+GET http://localhost:8080/api/users/1
+Authorization: Bearer {{auth_token}}
+Accept: application/json
+
+### 7. 检查用户名是否可用
+GET http://localhost:8080/api/users/check-username/admin
+Accept: application/json

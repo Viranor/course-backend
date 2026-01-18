@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h1>选课系统测试页面</h1>
+
+<div>
+    <h3>1. 先查看当前选课记录</h3>
+    <button onclick="getSelections()">查看学生8的选课</button>
+
+    <h3>2. 选课测试</h3>
+    <div>
+        学生ID: <input type="number" id="studentId" value="8"><br>
+        课程ID: <input type="number" id="courseId" value="1"><br>
+        学期: <input type="text" id="semester" value="2024-2025-2"><br>
+    </div>
+    <button onclick="selectCourse()">选课</button>
+
+    <h3>3. 退课测试</h3>
+    选课记录ID: <input type="number" id="selectionId" value="1">
+    <button onclick="dropCourse()">退课</button>
+</div>
+
+<div id="result" style="margin-top: 20px; padding: 10px; border: 1px solid #ddd;"></div>
+
+<script>
+    function showResult(message, isError = false) {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = `<pre style="color: ${isError ? 'red' : 'green'}">${message}</pre>`;
+    }
+
+    async function getSelections() {
+        try {
+            const studentId = document.getElementById('studentId').value;
+            const response = await fetch(`/api/selections/student/${studentId}`);
+            const selections = await response.json();
+            showResult(`学生${studentId}的选课记录:\n` + JSON.stringify(selections, null, 2));
+        } catch (error) {
+            showResult('错误: ' + error, true);
+        }
+    }
+
+    async function selectCourse() {
+        const data = {
+            studentId: parseInt(document.getElementById('studentId').value),
+            courseId: parseInt(document.getElementById('courseId').value),
+            semester: document.getElementById('semester').value
+        };
+
+        try {
+            const response = await fetch('/api/selections/select', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || '选课失败');
+            }
+
+            const result = await response.json();
+            showResult('选课成功:\n' + JSON.stringify(result, null, 2));
+        } catch (error) {
+            showResult('选课失败: ' + error.message, true);
+        }
+    }
+
+    async function dropCourse() {
+        const selectionId = document.getElementById('selectionId').value;
+
+        try {
+            const response = await fetch(`/api/selections/drop/${selectionId}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: '{}'
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || '退课失败');
+            }
+
+            const result = await response.json();
+            showResult('退课成功:\n' + JSON.stringify(result, null, 2));
+        } catch (error) {
+            showResult('退课失败: ' + error.message, true);
+        }
+    }
+</script>
+</body>
+</html>

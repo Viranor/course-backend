@@ -1,0 +1,58 @@
+### 获取测试token
+### 1. 重置token
+@admin_token =
+@teacher_token =
+@student_token =
+@student2_token =
+
+### 2. 管理员登录获取token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+> {%
+    admin_token = response.body.data.token
+%}
+
+### 3. 教师登录获取token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "teacher1",
+  "password": "teacher123"
+}
+
+> {%
+    teacher_token = response.body.data.token
+%}
+
+### 4. 学生1登录获取token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "student1",
+  "password": "student123"
+}
+
+> {%
+    student_token = response.body.data.token
+%}
+
+### 5. 学生2登录获取token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "student2",
+  "password": "student123"
+}
+
+> {%
+    student2_token = response.body.data.token
+%}

@@ -1,0 +1,43 @@
+### 测试健康检查接口
+GET http://localhost:8080/api/test/hello
+Accept: application/json
+
+### 测试健康检查接口
+GET http://localhost:8080/api/test/health
+Accept: application/json
+
+### 用户注册
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "123456",
+  "name": "测试用户",
+  "email": "test@example.com",
+  "role": "STUDENT"
+}
+
+### 用户登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "testuser",
+  "password": "123456"
+}
+
+### 获取当前用户信息
+GET http://localhost:8080/api/auth/me
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 验证Token
+POST http://localhost:8080/api/auth/validate
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### 获取所有课程
+GET http://localhost:8080/api/courses
+Authorization: Bearer {{token}}
+Accept: application/json

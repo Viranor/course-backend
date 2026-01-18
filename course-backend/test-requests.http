@@ -1,0 +1,313 @@
+### 基础健康检查
+GET http://localhost:8080/api/test/health
+Accept: application/json
+
+### 1. 用户注册
+### 注册管理员
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123",
+  "name": "系统管理员",
+  "email": "admin@test.com",
+  "role": "ADMIN",
+  "department": "管理员"
+}
+
+### 注册教师
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "teacher1",
+  "password": "teacher123",
+  "name": "王老师",
+  "email": "teacher1@test.com",
+  "role": "TEACHER",
+  "department": "计算机学院"
+}
+
+### 注册学生1
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "student1",
+  "password": "student123",
+  "name": "张三",
+  "email": "student1@test.com",
+  "role": "STUDENT",
+  "department": "计算机学院",
+  "major": "计算机科学与技术"
+}
+
+### 注册学生2
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "student2",
+  "password": "student123",
+  "name": "李四",
+  "email": "student2@test.com",
+  "role": "STUDENT",
+  "department": "计算机学院",
+  "major": "软件工程"
+}
+
+### 2. 用户登录
+### 管理员登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "admin123"
+}
+
+> {%
+    client.global.set("admin_token", response.body.data.token);
+%}
+
+### 教师登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "teacher1",
+  "password": "teacher123"
+}
+
+> {%
+    client.global.set("teacher_token", response.body.data.token);
+%}
+
+### 学生登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "student1",
+  "password": "student123"
+}
+
+> {%
+    client.global.set("student_token", response.body.data.token);
+%}
+
+### 3. 课程管理（需要教师/管理员权限）
+### 创建课程1
+POST http://localhost:8080/api/courses
+Authorization: Bearer {{teacher_token}}
+Content-Type: application/json
+
+{
+  "courseCode": "CS101",
+  "courseName": "计算机基础",
+  "credit": 3,
+  "totalHours": 48,
+  "maxCapacity": 100,
+  "semester": "2024-2025-2",
+  "timeSlot": "周一 1-2节",
+  "location": "教学楼A101",
+  "description": "计算机科学基础课程，介绍计算机基本原理和编程基础"
+}
+
+### 创建课程2
+POST http://localhost:8080/api/courses
+Authorization: Bearer {{teacher_token}}
+Content-Type: application/json
+
+{
+  "courseCode": "CS201",
+  "courseName": "数据结构",
+  "credit": 4,
+  "totalHours": 64,
+  "maxCapacity": 80,
+  "semester": "2024-2025-2",
+  "timeSlot": "周二 3-4节",
+  "location": "教学楼B201",
+  "description": "学习基本数据结构，包括数组、链表、栈、队列、树、图等"
+}
+
+### 创建课程3
+POST http://localhost:8080/api/courses
+Authorization: Bearer {{teacher_token}}
+Content-Type: application/json
+
+{
+  "courseCode": "MA101",
+  "courseName": "高等数学",
+  "credit": 5,
+  "totalHours": 80,
+  "maxCapacity": 150,
+  "semester": "2024-2025-2",
+  "timeSlot": "周三 5-6节",
+  "location": "教学楼C301",
+  "description": "大学数学基础课程，包括微积分、线性代数等内容"
+}
+
+### 获取所有课程
+GET http://localhost:8080/api/courses
+Authorization: Bearer {{teacher_token}}
+Accept: application/json
+
+> {%
+    client.test("获取课程成功", function() {
+        client.assert(response.status === 200, "响应状态应该是200");
+        client.assert(response.body.success === true, "响应应该成功");
+    });
+%}
+
+### 获取课程详情
+GET http://localhost:8080/api/courses/1
+Authorization: Bearer {{teacher_token}}
+Accept: application/json
+
+### 4. 选课功能（学生权限）
+### 学生查看可选的课程
+GET http://localhost:8080/api/courses/available
+Authorization: Bearer {{student_token}}
+Accept: application/json
+
+### 学生选课
+POST http://localhost:8080/api/selections/select
+Authorization: Bearer {{student_token}}
+Content-Type: application/json
+
+{
+  "studentId": 3,
+  "courseId": 1,
+  "semester": "2024-2025-2"
+}
+
+> {%
+    client.test("选课成功", function() {
+        client.assert(response.status === 200, "响应状态应该是200");
+        client.assert(response.body.success === true, "选课应该成功");
+        client.global.set("selection_id", response.body.data.id);
+    });
+%}
+
+### 再选一门课
+POST http://localhost:8080/api/selections/select
+Authorization: Bearer {{student_token}}
+Content-Type: application/json
+
+{
+  "studentId": 3,
+  "courseId": 2,
+  "semester": "2024-2025-2"
+}
+
+### 5. 查看选课记录
+### 查看学生的选课记录
+GET http://localhost:8080/api/selections/student/3
+Authorization: Bearer {{student_token}}
+Accept: application/json
+
+> {%
+    client.test("获取选课记录成功", function() {
+        client.assert(response.status === 200, "响应状态应该是200");
+        client.assert(response.body.success === true, "响应应该成功");
+    });
+%}
+
+### 查看课程的所有选课记录
+GET http://localhost:8080/api/selections/course/1
+Authorization: Bearer {{teacher_token}}
+Accept: application/json
+
+### 6. 查看课表
+### 获取学生的课表
+GET http://localhost:8080/api/selections/student/3/timetable/2024-2025-2
+Authorization: Bearer {{student_token}}
+Accept: application/json
+
+### 获取学生的学分统计
+GET http://localhost:8080/api/selections/student/3/credits/2024-2025-2
+Authorization: Bearer {{student_token}}
+Accept: application/json
+
+### 7. 学生退课
+### 学生退课
+DELETE http://localhost:8080/api/selections/{{selection_id}}
+Authorization: Bearer {{student_token}}
+Accept: application/json
+
+### 8. 用户管理
+### 获取所有用户（管理员权限）
+GET http://localhost:8080/api/users
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 分页获取用户
+GET http://localhost:8080/api/users/page?page=0&size=10&sortBy=createTime&sortOrder=desc
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 搜索用户
+GET http://localhost:8080/api/users/search?role=STUDENT
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 获取用户统计
+GET http://localhost:8080/api/users/stats
+Authorization: Bearer {{admin_token}}
+Accept: application/json
+
+### 9. 课程搜索和统计
+### 搜索课程
+GET http://localhost:8080/api/courses/search?keyword=计算机
+Accept: application/json
+
+### 按学期获取课程
+GET http://localhost:8080/api/courses/semester/2024-2025-2
+Accept: application/json
+
+### 获取课程统计
+GET http://localhost:8080/api/courses/stats
+Authorization: Bearer {{teacher_token}}
+Accept: application/json
+
+### 获取教师的课程
+GET http://localhost:8080/api/courses/teacher/2
+Authorization: Bearer {{teacher_token}}
+Accept: application/json
+
+### 10. 检查用户名是否可用
+GET http://localhost:8080/api/users/check-username/student1
+Accept: application/json
+
+### 检查邮箱是否可用
+GET http://localhost:8080/api/users/check-email/student1@test.com
+Accept: application/json
+
+### 11. 修改密码
+POST http://localhost:8080/api/users/3/change-password
+Authorization: Bearer {{student_token}}
+Content-Type: application/json
+
+{
+  "oldPassword": "student123",
+  "newPassword": "newpassword123"
+}
+
+### 12. 测试无权限访问
+### 尝试无token访问
+GET http://localhost:8080/api/courses
+Authorization: Bearer invalid_token
+Accept: application/json
+
+### 学生尝试创建课程（应该失败）
+POST http://localhost:8080/api/courses
+Authorization: Bearer {{student_token}}
+Content-Type: application/json
+
+{
+  "courseCode": "TEST101",
+  "courseName": "测试课程",
+  "credit": 2
+}
